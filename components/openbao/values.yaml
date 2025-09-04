@@ -1,0 +1,35 @@
+# https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
+
+global:
+  serverTelemetry:
+    prometheusOperator: false
+  metrics:
+    enabled: false
+
+server:
+  ha:
+    enabled: true
+    raft:
+      enabled: true
+  auditStorage:
+    enabled: true
+    storageClass: cephfs
+    size: 10Gi
+  dataStorage:
+    enabled: true
+    storageClass: cephfs
+    size: 10Gi
+    
+serverTelemetry:
+  prometheusRules:
+    enabled: false
+  serviceMonitor:
+    enabled: false
+
+ui:
+  enabled: true
+  serviceType: LoadBalancer
+  annotations:
+    kube-vip.io/loadbalancerIPs: 192.168.250.5
+csi:
+  enabled: false
