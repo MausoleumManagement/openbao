@@ -2,6 +2,9 @@ Wenn eine Openbao-Instanz installiert wird, ist sie zunaechst uninitialisiert. D
 
 
 
+
+## Initialisierung
+
 Falls wir mehr Heckmeck beim Entsiegeln haben wollen
 ```
 k -n openbao exec -it openbao-0 -- bao operator init \
@@ -18,6 +21,9 @@ k -n openbao exec -it openbao-0 -- bao operator init \
 ```
 
 
+
+## Raft Setup Prozedur
+
 ```
 k -n openbao exec -it openbao-0 -- bao operator unseal
 
@@ -26,6 +32,16 @@ k -n openbao exec -it openbao-1 -- bao operator raft join http://openbao-0.openb
 k -n openbao exec -it openbao-1 -- bao operator unseal
 
 k -n openbao exec -it openbao-2 -- bao operator raft join http://openbao-0.openbao-internal:8200
+k -n openbao exec -it openbao-2 -- bao operator unseal
+```
+
+## HA Postgres (CNPG) Setup Prozedur
+
+```
+k -n openbao exec -it openbao-0 -- bao operator unseal
+
+k -n openbao exec -it openbao-1 -- bao operator unseal
+
 k -n openbao exec -it openbao-2 -- bao operator unseal
 ```
 

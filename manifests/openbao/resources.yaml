@@ -129,14 +129,9 @@ data:
       tls_disable = 1
       address = "[::]:8200"
       cluster_address = "[::]:8201"
-      # Enable unauthenticated metrics access (necessary for Prometheus Operator)
-      #telemetry {
-      #  unauthenticated_metrics_access = "true"
-      #}
     }
-
-    storage "raft" {
-      path = "/openbao/data"
+    storage "postgresql" {
+      ha_enabled = "true"
     }
 
     service_registration "kubernetes" {}
@@ -496,6 +491,11 @@ spec:
           value: https://$(HOSTNAME).openbao-internal:8201
         - name: HOME
           value: /home/openbao
+        - name: BAO_PG_CONNECTION_URL
+          valueFrom:
+            secretKeyRef:
+              key: BAO_PG_CONNECTION_URL
+              name: openbao
         image: quay.io/openbao/openbao:2.4.0
         imagePullPolicy: IfNotPresent
         lifecycle:
@@ -529,8 +529,6 @@ spec:
         volumeMounts:
         - mountPath: /openbao/audit
           name: audit
-        - mountPath: /openbao/data
-          name: data
         - mountPath: /openbao/config
           name: config
         - mountPath: /home/openbao
@@ -552,17 +550,6 @@ spec:
   updateStrategy:
     type: OnDelete
   volumeClaimTemplates:
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: data
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
-      storageClassName: cephfs
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -592,6 +579,24 @@ spec:
       app.kubernetes.io/instance: openbao
       app.kubernetes.io/name: openbao
       component: server
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-openbao
+  namespace: openbao
+spec:
+  bootstrap:
+    initdb:
+      database: openbao
+      owner: openbao
+      secret:
+        name: cnpg-openbao-app-user
+  instances: 3
+  storage:
+    size: 10Gi
+  superuserSecret:
+    name: cnpg-openbao-superuser
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration

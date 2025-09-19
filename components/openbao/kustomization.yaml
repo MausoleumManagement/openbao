@@ -13,5 +13,6 @@ helmcharts:
     valuesFile: values.yaml
 resources:
   - namespace.yaml
+  - cnpg-openbao.yaml
 patches:
   - path: patch-delete-helm-test-pod.yaml

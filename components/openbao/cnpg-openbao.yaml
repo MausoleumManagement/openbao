@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-openbao
+spec:
+  instances: 3
+
+  superuserSecret:
+    name: cnpg-openbao-superuser
+
+  bootstrap:
+    initdb:
+      database: openbao
+      owner: openbao
+      secret:
+        name: cnpg-openbao-app-user
+  storage:
+    size: 10Gi
