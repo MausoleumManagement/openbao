@@ -20,6 +20,7 @@ k -n openbao exec -it openbao-0 -- bao operator init \
     -key-threshold=1
 ```
 
+Neben dem Schluessel zum Entsiegeln wird auch ein Initialtoken ausgegeben, mit dem wir uns authentifizieren koennen. Siehe unten unter **Authentifizierung**.
 
 
 ## Raft Setup Prozedur
@@ -45,7 +46,29 @@ k -n openbao exec -it openbao-1 -- bao operator unseal
 k -n openbao exec -it openbao-2 -- bao operator unseal
 ```
 
+## Authentifizierung
 
-## Lektuere
+Mittels des vorgenerierten root-Tokens koennen wir uneingeschraenkt arbeiten, deswegen wird empfohlen, dieses alsbald zu entwerten.
+```
+k -n openbao exec -it openbao-0 -- sh
+bao login token=abc123
+```
 
-- https://openbao.org/docs/platform/k8s/helm/examples/ha-with-raft/
+
+Um Passwort-Authentifizierung zu ermoeglichen,  muessen wir die entsprechende Methode zunaechst einschalten:
+```
+bao auth enable userpass
+```
+
+Das vorherige Kommando gibt den API-Pfad zurueck, unter dem die neue Methode aktiviert wird:
+
+```
+Success! Enabled userpass auth method at: userpass/
+```
+
+Im Anschluss koennnen wir im entsprechenden API-Pfad einen Eintrag mit dem Namen admin anlegen, und desen Inhalt kann dann zur Authentifizierung genutzt werden.
+```
+bao write auth/userpass/users/admin \
+    password=abc123 \
+    policies=admins
+```
