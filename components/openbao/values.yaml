@@ -50,6 +50,6 @@ ui:
   enabled: true
   serviceType: LoadBalancer
   annotations:
-    kube-vip.io/loadbalancerIPs: 192.168.250.5
+    kube-vip.io/loadbalancerIPs: 192.168.13.8
 csi:
   enabled: false
