@@ -580,6 +580,42 @@ spec:
       app.kubernetes.io/name: openbao
       component: server
 ---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: openbao
+  namespace: openbao
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - hostname: openbao.irminsul
+    name: https-2
+    port: 443
+    protocol: HTTPS
+    tls:
+      certificateRefs:
+      - kind: Secret
+        name: ca
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openbao
+  namespace: openbao
+spec:
+  hostnames:
+  - openbao.irminsul
+  parentRefs:
+  - name: tls-gateway
+  rules:
+  - backendRefs:
+    - name: openbao
+      port: 8200
+    matches:
+    - path:
+        type: PathPrefix
+        value: /
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:

@@ -1,0 +1,45 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openbao-tls-cert
+spec:
+  secretName: openbao-tls-cert
+  issuerRef:
+    name: local-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "openbao.irminsul"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: openbao-gateway
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - name: https-2
+    protocol: HTTPS
+    port: 443
+    hostname: "openbao.irminsul"
+    tls:
+      certificateRefs:
+      - kind: Secret
+        name: openbao-tls-cert
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openbao
+spec:
+  parentRefs:
+  - name: openbao-gateway
+  hostnames:
+  - "openbao.irminsul"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: openbao
+      port: 8200
